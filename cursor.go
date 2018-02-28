@@ -60,7 +60,7 @@ func MoveLeft(t *Text, c *Cursor, sel *Selection) Action {
 	if !sel.Empty() {
 		return MoveAction{
 			c.BPos(),
-			sel.Left(),
+			sel.Min(),
 		}
 	}
 	return MoveAction{
@@ -73,7 +73,7 @@ func MoveRight(t *Text, c *Cursor, sel *Selection) Action {
 	if !sel.Empty() {
 		return MoveAction{
 			c.BPos(),
-			sel.Right(),
+			sel.Max(),
 		}
 	}
 	return MoveAction{

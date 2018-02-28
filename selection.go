@@ -14,16 +14,10 @@ func (s *Selection) Empty() bool {
 	return s.rng.Start == s.rng.End
 }
 
-func (s *Selection) Left() cell.Pt {
-	if s.rng.Start.Compare(s.rng.End) <= 0 {
-		return s.rng.Start
-	}
-	return s.rng.End
+func (s *Selection) Min() cell.Pt {
+	return s.rng.Min()
 }
 
-func (s *Selection) Right() cell.Pt {
-	if s.rng.Start.Compare(s.rng.End) <= 0 {
-		return s.rng.End
-	}
-	return s.rng.Start
+func (s *Selection) Max() cell.Pt {
+	return s.rng.Max()
 }
