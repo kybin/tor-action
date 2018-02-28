@@ -1,53 +1,30 @@
 package action
 
-type History struct {
-	cur     int
-	actions []Action
-}
-
-func (h *History) Append(a Action) {
-	h.actions = append(h.actions, a)
-}
-
-func (h *History) Undo() {
-	if h.cur == 0 {
-		return
-	}
-	h.actions[cur].Undo()
-	cur--
-}
-
-func (h *History) Redo() {
-	if h.cur == len(h.actions)-1 {
-		return
-	}
-	h.actions[h.cur].Do()
-	h.cur++
-}
+import "github.com/kybin/tor/cell"
 
 type Action interface {
-	Do()
-	Undo()
+	Do(*Text, *Cursor, *Selection)
+	Undo(*Text, *Cursor, *Selection)
 	Merge(Action) bool
 }
 
-type ActionGenerator func(t *Text, c *Cursor, s *Selection) Action
+type ActionGenerator func(*Text, *Cursor, *Selection) Action
 
 type GroupAction struct {
 	actions []Action
 }
 
-func (g GroupAction) Do() {
+func (g GroupAction) Do(t *Text, c *Cursor, sel *Selection) {
 	for _, a := range g.actions {
-		a.Do()
+		a.Do(t, c, sel)
 	}
 }
 
-func (g GroupAction) Undo() {
+func (g GroupAction) Undo(t *Text, c *Cursor, sel *Selection) {
 	for i := range g.actions {
-		j = len(g.actions) - 1 - i
+		j := len(g.actions) - 1 - i
 		a := g.actions[j]
-		a.Undo()
+		a.Undo(t, c, sel)
 	}
 }
 
@@ -56,21 +33,38 @@ func (g GroupAction) Merge(a Action) bool {
 }
 
 type MoveAction struct {
-	old Pos
-	new Pos
+	old cell.Pt
+	new cell.Pt
+}
+
+func (a MoveAction) Do(t *Text, c *Cursor, sel *Selection) {
+	c.SetBPos(a.new)
+}
+
+func (a MoveAction) Undo(t *Text, c *Cursor, sel *Selection) {
+	c.SetBPos(a.old)
+}
+
+func (a MoveAction) Merge(b Action) bool {
+	m, ok := b.(MoveAction)
+	if !ok {
+		return false
+	}
+	a.new = m.new
+	return true
 }
 
 type InsertAction struct {
-	p        Pos
+	p        cell.Pt
 	inserted string
 }
 
 type DeleteAction struct {
-	p         Pos
+	p         cell.Pt
 	backspace bool
 }
 
 type SelectAction struct {
-	old Range
-	new Range
+	old cell.Range
+	new cell.Range
 }
